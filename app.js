@@ -9,7 +9,7 @@ const URL_SIGNIN = "https://pro.academind.com/sign_in";
 const EMAIL = process.env.EMAIL;
 const PASSWORD = process.env.PASSWORD;
 
-let courseId = 20;
+let courseId = 7;
 let sign_in = false;
 
 const bar1 = new cliProgress.SingleBar(cliProgress.Presets.shades_classic);
@@ -34,8 +34,14 @@ const bar1 = new cliProgress.SingleBar(cliProgress.Presets.shades_classic);
 
   const courseTarget = new Course(courseId);
 
+  let courstStatus = courseTarget.status;
   let courseName = courseTarget.name;
   let linkLectures = courseTarget.linkLectures;
+
+  if (courstStatus === "Downloaded") {
+    console.log("Khoá học đã được download");
+    return browser.close();
+  }
 
   console.log(`Khoá học: ${courseName}`);
 

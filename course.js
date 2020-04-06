@@ -224,7 +224,7 @@ class Course {
   }
 
   saveDownloadLinks() {
-    const FILE_NAME = "download-links.txt";
+    const FILE_NAME = "download-links";
 
     console.log(`Tiến hành ghi file: ${FILE_NAME}`);
 
@@ -338,7 +338,7 @@ class Course {
 
     for (let section of dataLinks) {
       const data = section.linksDownload.join("\n").replace(/\,/g, "\n");
-      const fileName = this.sections[section.name].sectionDir + ".txt";
+      const fileName = this.sections[section.name].sectionDir;
 
       this.sections[section.name].sectionDir;
 
