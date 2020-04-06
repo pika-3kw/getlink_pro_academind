@@ -9,13 +9,10 @@ const URL_SIGNIN = "https://pro.academind.com/sign_in";
 const EMAIL = process.env.EMAIL;
 const PASSWORD = process.env.PASSWORD;
 
-let courseId = 9;
+let courseId = 20;
 let sign_in = false;
 
-const bar1 = new cliProgress.SingleBar(
-  { linewrap: true },
-  cliProgress.Presets.shades_classic
-);
+const bar1 = new cliProgress.SingleBar(cliProgress.Presets.shades_classic);
 
 (async () => {
   const browser = await puppeteer.launch({ headless: false });
@@ -28,7 +25,7 @@ const bar1 = new cliProgress.SingleBar(
 
   const GetCourses = new Courses(page1);
 
-  const allCourses = GetCourses.allCourses();
+  const allCourses = await GetCourses.allCourses();
 
   if (allCourses.length === 0) {
     console.log("Không có dữ liệu");
@@ -46,12 +43,15 @@ const bar1 = new cliProgress.SingleBar(
     await courseTarget.crawlAndWriteCourseData(page1);
   }
 
+  courseTarget.createSectionFolder();
+
   const page2 = await browser.newPage();
   await page2.setDefaultNavigationTimeout(0);
 
   await courseTarget.startGetLink(page2, bar1);
 
   await courseTarget.saveDownloadLinks();
+
   await courseTarget.saveData();
 
   await courseTarget.saveProcessData();

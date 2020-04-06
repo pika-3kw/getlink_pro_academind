@@ -1,9 +1,11 @@
 const fs = require("fs");
 const path = require("path");
 
+const SAVE_PATH = process.env.SAVE_PATH;
+
 class Courses {
   constructor(page) {
-    this.path = path.join(__dirname, "result");
+    this.path = path.join(SAVE_PATH, "result");
     this.fileName = "courses.json";
     this.fileIsExist = fs.existsSync(this.path, this.fileName);
     this.page = page;
@@ -12,20 +14,19 @@ class Courses {
   }
 
   createPath() {
-    fs.mkdirSync(this.path, { recursive: true });
+    fs.mkdirSync(path.join(this.path, "result"), { recursive: true });
   }
 
   readCoursesFile() {
-    console.log(`Đọc file ${this.fileName}`);
     if (!this.fileIsExist) {
-      const error = new Error("File không tồn tại");
+      const error = new Error(`[${this.fileName}]: Không tồn tại`);
       error.name = "ErrorReadFile";
       throw error;
     }
 
-    let courses = fs.readFileSync(path.join(this.path, this.fileName));
+    let courses = fs.readFileSync(path.join(this.path, this.fileName), "utf-8");
     courses = JSON.parse(courses);
-    console.log("Đọc file thành công");
+    console.log(`[${this.fileName}]: Đọc thành công`);
     return courses;
   }
 
@@ -38,24 +39,28 @@ class Courses {
       throw error;
     }
 
-    fs.writeFile(
-      path.join(this.path, this.fileName),
-      JSON.stringify(this.data, null, 4),
-      (err) => {
-        if (err) {
-          const error = new Error("Lỗi trong quá trình ghi file");
-          error.name = "ErrorWriteFile";
-          throw error;
+    try {
+      fs.writeFile(
+        path.join(this.path, this.fileName),
+        JSON.stringify(this.data, null, 4),
+        "utf-8",
+        (err) => {
+          if (err) {
+            const error = new Error("Lỗi trong quá trình ghi file");
+            error.name = "ErrorWriteFile";
+            throw error;
+          }
+          console.log("Ghi file thành công");
         }
-        console.log("Ghi file thành công");
-      }
-    );
+      );
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   dataCrawler() {
     return new Promise(async (resolve, reject) => {
       try {
-        console.log("Tiến hành crawl data");
         const allCourses = await this.page.evaluate(() => {
           let courses = document.querySelectorAll(".enrolled-child-course");
           courses = [...courses];
@@ -64,13 +69,14 @@ class Courses {
             name: elem.querySelector(".course-listing-title").innerText,
             link: elem.querySelector("a").href,
           }));
-          console.log("Crawl data thành công");
+          console.log("Lấy dữ liệu website thành công");
 
           return courses;
         });
 
         return resolve(allCourses);
       } catch (err) {
+        console.log("Lấy dữ liệu website thất bại");
         const error = new Error(err);
         error.name = "UnHandle";
         return reject(error);
