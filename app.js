@@ -9,7 +9,7 @@ const URL_SIGNIN = "https://pro.academind.com/sign_in";
 const EMAIL = process.env.EMAIL;
 const PASSWORD = process.env.PASSWORD;
 
-let courseId = 7;
+let courseId = 19;
 let sign_in = false;
 
 const bar1 = new cliProgress.SingleBar(cliProgress.Presets.shades_classic);
@@ -56,6 +56,8 @@ const bar1 = new cliProgress.SingleBar(cliProgress.Presets.shades_classic);
 
   await courseTarget.startGetLink(page2, bar1);
 
+  // console.log(JSON.stringify(courseTarget.refLinks, null, 2));
+
   await courseTarget.saveDownloadLinks();
 
   await courseTarget.saveData();
@@ -64,7 +66,8 @@ const bar1 = new cliProgress.SingleBar(cliProgress.Presets.shades_classic);
 
   console.log("Close browser");
 
-  return browser.close();
+  browser.close();
+  return;
 
   //
 })();

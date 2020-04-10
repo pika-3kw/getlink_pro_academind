@@ -38,7 +38,10 @@ class Course {
       const folderName =
         this.id.toString().padStart(2, "0") +
         "-" +
-        courseInfo.name.replace(/ |\-|\+|\,/g, "");
+        courseInfo.name.replace(
+          / |\-|\+|\,|\"|\'|\?|\:|\!|\@|\#|\$|\\|\*|\//g,
+          ""
+        );
       this.path = path.join(SAVE_PATH, folderName);
 
       return dataCourses;
@@ -181,7 +184,9 @@ class Course {
           this.writeTextData(
             lectureTextContent,
             sectionDir,
-            lectureName.replace(/ |\-|\+|\,/g, "").trim()
+            lectureName
+              .replace(/ |\-|\+|\,|\"|\'|\?|\:|\!|\@|\#|\$|\\|\*|\//g, "")
+              .trim()
           );
         }
 
@@ -220,7 +225,7 @@ class Course {
       startIndex,
     };
 
-    await this.writeJsonData(dataProcess, FILE_NAME);
+    this.writeJsonData(dataProcess, FILE_NAME);
   }
 
   saveDownloadLinks() {
@@ -238,21 +243,27 @@ class Course {
   }
 
   createSectionFolder() {
-    fs.mkdirSync(path.join(this.path, "links"), { recursive: true });
-
     this.sections = {};
 
     this.data.forEach((section, i) => {
       const sectionDir =
         i.toString().padStart(2, "0") +
         "-" +
-        section.name.replace(/ |\-|\+|\,/g, "");
+        section.name.replace(
+          / |\-|\+|\,|\"|\'|\?|\:|\!|\@|\#|\$|\\|\*|\//g,
+          ""
+        );
 
       this.sections[section.name] = {
         id: i,
         sectionDir,
       };
-      fs.mkdirSync(path.join(this.path, sectionDir), { recursive: true });
+
+      try {
+        fs.mkdirSync(path.join(this.path, sectionDir), { recursive: true });
+      } catch (err) {
+        console.log(err);
+      }
     });
   }
 
@@ -337,12 +348,25 @@ class Course {
     });
 
     for (let section of dataLinks) {
-      const data = section.linksDownload.join("\n").replace(/\,/g, "\n");
       const fileName = this.sections[section.name].sectionDir;
 
-      this.sections[section.name].sectionDir;
+      console.log(path.join(this.path, fileName, "links.txt"));
 
-      this.writeTextData(data, "links", fileName);
+      let data = [];
+      try {
+        data = fs
+          .readFileSync(path.join(this.path, fileName, "links.txt"))
+          .toString()
+          .split("\n");
+      } catch (error) {}
+
+      let newData = section.linksDownload.flat();
+
+      data.push(...newData);
+
+      data = data.filter((elem, i) => i === data.indexOf(elem));
+
+      this.writeTextData(data.join("\n"), fileName, "links");
     }
 
     this.writeJsonData(mergedData, FILE_NAME);
